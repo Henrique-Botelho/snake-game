@@ -1,14 +1,14 @@
 let pontos = document.getElementById("score");
+let record = document.getElementById("record");
 let canvas = document.getElementById("meuCanvas");
 let ctx = canvas.getContext("2d");
 
 let score = 0;
 let velocidade = 5;
-let tamanho = 20,
-  vxcobra = 0,
-  vycobra = 0,
-  corpo = [[12, 11]],
-  rastro = [];
+let tamanho = 20;
+let vcobra = [0, 0];
+let corpo = [[12, 11]];
+let rastro = [];
 
 let maca = [
   Math.floor(Math.random() * (canvas.width / tamanho)),
@@ -25,8 +25,8 @@ function desenhaCobra() {
   for (let c = 0; c < corpo.length - 1; c++) {
     rastro.push(corpo[c]);
   }
-  corpo[0][0] += vxcobra;
-  corpo[0][1] += vycobra;
+  corpo[0][0] += vcobra[0];
+  corpo[0][1] += vcobra[1];
   gameOver();
   corpo = [[corpo[0][0], corpo[0][1]], ...rastro];
   limites();
@@ -49,13 +49,13 @@ function comeu() {
 }
 
 function adicionaGomo() {
-  if (vycobra === 1) {
+  if (vcobra[1] === 1) {
     corpo.push([corpo[corpo.length - 1][0], corpo[corpo.length - 1][1] - 1]);
-  } else if (vycobra === -1) {
+  } else if (vcobra[1] === -1) {
     corpo.push([corpo[corpo.length - 1][0], corpo[corpo.length - 1][1] + 1]);
-  } else if (vxcobra === 1) {
+  } else if (vcobra[0] === 1) {
     corpo.push([corpo[corpo.length - 1][0] - 1, corpo[corpo.length - 1][1]]);
-  } else if (vxcobra === -1) {
+  } else if (vcobra[0] === -1) {
     corpo.push([corpo[corpo.length - 1][0] + 1, corpo[corpo.length - 1][1]]);
   }
 }
@@ -82,24 +82,30 @@ function limpar() {
 }
 
 function limites() {
-  if (vxcobra !== 0 || vycobra !== 0) {
-    if (corpo[0][0] === canvas.width / tamanho) {
-      corpo[0][0] = -1;
-    } else if (corpo[0][0] === -1) {
-      corpo[0][0] = canvas.width / tamanho;
-    } else if (corpo[0][1] === -1) {
-      corpo[0][1] = canvas.height / tamanho;
-    } else if (corpo[0][1] === canvas.height / tamanho) {
-      corpo[0][1] = -1;
-    }
+  if (corpo[0][0] > canvas.width / tamanho) {
+    corpo[0][0] = 0;
+  } else if (corpo[0][0] < 0) {
+    corpo[0][0] = canvas.width / tamanho;
+  } else if (corpo[0][1] < 0) {
+    corpo[0][1] = canvas.height / tamanho;
+  } else if (corpo[0][1] > canvas.height / tamanho) {
+    corpo[0][1] = 0;
   }
 }
 
 function gameOver() {
-  if (vycobra !== 0 || vxcobra !== 0) {
+  if (vcobra[0] !== 0 || vcobra[1] !== 0) {
     for (let c = 1; c < corpo.length; c++) {
       let teste = corpo[0][0] === corpo[c][0] && corpo[0][1] === corpo[c][1];
       if (teste) {
+        let Arecord = localStorage.getItem('record');
+        if (Arecord) {
+          if (parseInt(Arecord) < score) {
+            localStorage.setItem('record', `${score}`);
+          }
+        } else {
+          localStorage.setItem('record', `${score}`);
+        }
         start();
       }
     }
@@ -111,50 +117,50 @@ function controles() {
     switch (e.key) {
       case "ArrowUp":
         if (
-          vycobra !== 1 &&
+          vcobra[1] !== 1 &&
           corpo[0][0] !== canvas.width / tamanho &&
           corpo[0][0] !== -1 &&
           corpo[0][1] !== -1 &&
           corpo[0][1] !== canvas.height / tamanho
         ) {
-          vycobra = -1;
-          vxcobra = 0;
+          vcobra[1] = -1;
+          vcobra[0] = 0;
         }
         break;
       case "ArrowDown":
         if (
-          vycobra !== -1 &&
+          vcobra[1] !== -1 &&
           corpo[0][0] !== canvas.width / tamanho &&
           corpo[0][0] !== -1 &&
           corpo[0][1] !== -1 &&
           corpo[0][1] !== canvas.height / tamanho
         ) {
-          vycobra = 1;
-          vxcobra = 0;
+          vcobra[1] = 1;
+          vcobra[0] = 0;
         }
         break;
       case "ArrowLeft":
         if (
-          vxcobra !== 1 &&
+          vcobra[0] !== 1 &&
           corpo[0][0] !== canvas.width / tamanho &&
           corpo[0][0] !== -1 &&
           corpo[0][1] !== -1 &&
           corpo[0][1] !== canvas.height / tamanho
         ) {
-          vxcobra = -1;
-          vycobra = 0;
+          vcobra[0] = -1;
+          vcobra[1] = 0;
         }
         break;
       case "ArrowRight":
         if (
-          vxcobra !== -1 &&
+          vcobra[0] !== -1 &&
           corpo[0][0] !== canvas.width / tamanho &&
           corpo[0][0] !== -1 &&
           corpo[0][1] !== -1 &&
           corpo[0][1] !== canvas.height / tamanho
         ) {
-          vxcobra = 1;
-          vycobra = 0;
+          vcobra[0] = 1;
+          vcobra[1] = 0;
         }
         break;
     }
@@ -172,8 +178,7 @@ function start() {
   score = 0;
   velocidade = 5;
   tamanho = 20;
-  vxcobra = 0;
-  vycobra = 0;
+  vcobra = [0,0 ]
   corpo = [[12, 11]];
   rastro = [];
 
@@ -191,6 +196,14 @@ function start() {
 
   main();
   controles();
+  
+  let Lrecord = localStorage.getItem('record');
+  if (Lrecord) {
+    record.textContent = `Recorde: ${Lrecord}`;
+  } else {
+    record.textContent = `Recorde: 0`;
+  }
+
 }
 
 let meuIntervalo = setInterval(() => main(), 1000 / velocidade);
