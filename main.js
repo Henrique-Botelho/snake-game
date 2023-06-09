@@ -3,8 +3,8 @@ let record = document.getElementById("record");
 let canvas = document.getElementById("meuCanvas");
 let ctx = canvas.getContext("2d");
 
+let quadros = 10;
 let score = 0;
-let velocidade = 5;
 let tamanho = 20;
 let vcobra = [0, 0];
 let corpo = [[12, 11]];
@@ -20,19 +20,25 @@ for (let c = 0; c < corpo.length - 1; c++) {
 }
 
 function desenhaCobra() {
+  ctx.beginPath();
   comeu();
-  ctx.fillStyle = "white";
   for (let c = 0; c < corpo.length - 1; c++) {
     rastro.push(corpo[c]);
   }
   corpo[0][0] += vcobra[0];
   corpo[0][1] += vcobra[1];
   gameOver();
-  corpo = [[corpo[0][0], corpo[0][1]], ...rastro];
   limites();
+  corpo = [[corpo[0][0], corpo[0][1]], ...rastro];
+  
+  ctx.fillStyle = "green";
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 4;
   corpo.forEach((item) => {
-    ctx.fillRect(item[0] * tamanho, item[1] * tamanho, tamanho, tamanho);
+    ctx.rect(item[0] * tamanho, item[1] * tamanho, tamanho, tamanho);
   });
+  ctx.fill();
+  ctx.stroke();
   rastro = [];
 }
 
@@ -42,9 +48,6 @@ function comeu() {
     score += 1;
     randomMaca();
     adicionaGomo();
-    velocidade += 1;
-    clearInterval(meuIntervalo);
-    meuIntervalo = setInterval(() => main(), 1000 / velocidade);
   }
 }
 
@@ -82,13 +85,13 @@ function limpar() {
 }
 
 function limites() {
-  if (corpo[0][0] > canvas.width / tamanho) {
+  if (corpo[0][0] > (canvas.width / tamanho) -1) {
     corpo[0][0] = 0;
   } else if (corpo[0][0] < 0) {
-    corpo[0][0] = canvas.width / tamanho;
+    corpo[0][0] = (canvas.width / tamanho) -1;
   } else if (corpo[0][1] < 0) {
-    corpo[0][1] = canvas.height / tamanho;
-  } else if (corpo[0][1] > canvas.height / tamanho) {
+    corpo[0][1] = (canvas.height / tamanho) -1;
+  } else if (corpo[0][1] > (canvas.height / tamanho) -1) {
     corpo[0][1] = 0;
   }
 }
@@ -114,55 +117,18 @@ function gameOver() {
 
 function controles() {
   document.addEventListener("keydown", (e) => {
-    switch (e.key) {
-      case "ArrowUp":
-        if (
-          vcobra[1] !== 1 &&
-          corpo[0][0] !== canvas.width / tamanho &&
-          corpo[0][0] !== -1 &&
-          corpo[0][1] !== -1 &&
-          corpo[0][1] !== canvas.height / tamanho
-        ) {
-          vcobra[1] = -1;
-          vcobra[0] = 0;
-        }
-        break;
-      case "ArrowDown":
-        if (
-          vcobra[1] !== -1 &&
-          corpo[0][0] !== canvas.width / tamanho &&
-          corpo[0][0] !== -1 &&
-          corpo[0][1] !== -1 &&
-          corpo[0][1] !== canvas.height / tamanho
-        ) {
-          vcobra[1] = 1;
-          vcobra[0] = 0;
-        }
-        break;
-      case "ArrowLeft":
-        if (
-          vcobra[0] !== 1 &&
-          corpo[0][0] !== canvas.width / tamanho &&
-          corpo[0][0] !== -1 &&
-          corpo[0][1] !== -1 &&
-          corpo[0][1] !== canvas.height / tamanho
-        ) {
-          vcobra[0] = -1;
-          vcobra[1] = 0;
-        }
-        break;
-      case "ArrowRight":
-        if (
-          vcobra[0] !== -1 &&
-          corpo[0][0] !== canvas.width / tamanho &&
-          corpo[0][0] !== -1 &&
-          corpo[0][1] !== -1 &&
-          corpo[0][1] !== canvas.height / tamanho
-        ) {
-          vcobra[0] = 1;
-          vcobra[1] = 0;
-        }
-        break;
+    if (e.key === "ArrowUp" && vcobra[1] !== 1) {
+      vcobra[1] = -1;
+      vcobra[0] = 0;
+    } else if (e.key === "ArrowDown" && vcobra[1] !== -1) {
+      vcobra[1] = 1;
+      vcobra[0] = 0;
+    } else if (e.key === "ArrowLeft" && vcobra[0] !== 1) {
+      vcobra[0] = -1;
+      vcobra[1] = 0;
+    } else if (e.key === "ArrowRight" && vcobra[0] !== -1) {
+      vcobra[0] = 1;
+      vcobra[1] = 0;
     }
   });
 }
@@ -192,7 +158,7 @@ function start() {
   }
 
   clearInterval(meuIntervalo);
-  meuIntervalo = setInterval(() => main(), 1000 / velocidade);
+  meuIntervalo = setInterval(() => main(), 1000 / quadros);
 
   main();
   controles();
@@ -206,6 +172,6 @@ function start() {
 
 }
 
-let meuIntervalo = setInterval(() => main(), 1000 / velocidade);
+let meuIntervalo = setInterval(() => main(), 1000 / quadros);
 
 start();
